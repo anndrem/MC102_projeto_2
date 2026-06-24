@@ -1,0 +1,24 @@
+NIPES:
+♣ Paus: Clubs
+♥ Copas: Hearts
+♠ Espadas: Spades
+♦ Ouros: Diamonds
+
+
+card: tuple = (carta: str, nipe: str)
+
+
+var top_card: tuple = card
+-- exemplo:
+-- var top_card: tuple = ('K', 'Clubs')
+-- nesse caso: o vira da rodada foi um k de paus
+
+var score_hist: list = [[ponto - time 1: int , ponto - time 2: int], ponto - rodada: int]
+-- exemplo:
+-- var score_hist: list = [[0,1], 3]
+-- nesse caso: o time 2 esta com 1 ponto e foi pedido truco e esta valendo 3 pontos esta rodada
+
+var play_hist: list = [[position: int, card: tuple, modo: str]]
+-- exemplo:
+-- var play_hist: list = [[0, ('K', 'Clubs'), "normal"]]
+-- nesse caso: o jogador de posicao 0 na mesa jogou um k de paus de maneira normal
