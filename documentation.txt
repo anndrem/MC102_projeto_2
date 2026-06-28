@@ -20,5 +20,5 @@ var score_hist: list = [[ponto - time 1: int , ponto - time 2: int], ponto - rod
 
 var play_hist: list = [[[position: int, card: tuple, modo: str]]]
 -- exemplo:
--- var play_hist: list = [[[0, ('K', 'Clubs'), "normal"]]]
--- nesse caso: o jogador de posicao 0 na mesa jogou um k de paus de maneira normal
+-- var play_hist: list = [[[0, ('K', 'Clubs'), "normal"], [1, None, "truco"]]]
+-- nesse caso: o jogador de posicao 0 na mesa jogou um k de paus de maneira normal e o jogador de posicao numero 1 pediu truco NA RODADA 1

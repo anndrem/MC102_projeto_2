@@ -20,9 +20,13 @@ class CheckCards():
         
 
     def _listIdx(self):
-        idx_c1, idx_n1 = self._ORDER_CARDS.index(self._hand_cards[0][0]), self._ORDER_NIPES.index(self._hand_cards[0][1])
-        idx_c2, idx_n2 = self._ORDER_CARDS.index(self._hand_cards[1][0]), self._ORDER_NIPES.index(self._hand_cards[1][1])
-        idx_c3, idx_n3 = self._ORDER_CARDS.index(self._hand_cards[2][0]), self._ORDER_NIPES.index(self._hand_cards[2][1])
+        order_c_idx = lambda x: self._ORDER_CARDS.index(x)
+        order_n_idx = lambda x: self._ORDER_NIPES.index(x)
+
+
+        idx_c1, idx_n1 = order_c_idx(self._hand_cards[0][0]), order_n_idx(self._hand_cards[0][1])
+        idx_c2, idx_n2 = order_c_idx(self._hand_cards[1][0]), order_n_idx(self._hand_cards[1][1])
+        idx_c3, idx_n3 = order_c_idx(self._hand_cards[2][0]), order_n_idx(self._hand_cards[2][1])
         
         cards_idx = [[idx_c1, idx_n1], [idx_c2, idx_n2], [idx_c3, idx_n3]]
         return cards_idx
@@ -70,7 +74,7 @@ class PlayersHand(CheckCards):
         self._manilhas = there_is_manilha[1]
         return True
     
-    def use_manilha(self):          
+    def use_manilha(self):
         return self._hand_cards.index(self._manilhas.pop())
 
 
@@ -91,6 +95,7 @@ class SmartPlayer(Player):
             self._start(top_card)
 
         my_hand = self._checker_hand(self.cards, top_card)
+
 
         if my_hand.manilhas():
             pedir_truco = True if score_hist[-1][-1] == 1 else False
