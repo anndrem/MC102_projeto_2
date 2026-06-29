@@ -60,10 +60,6 @@ class SmartPlayer(Player):
         self.my_manilhas = []
         self._CheckCards = CheckCards
 
-    @setter
-    def manilha(self, value)
-        self._manilha[0] = value
-    
     '''O JOGO ESTA DEFINIDO AQUI'''
     def play(self, top_card, play_hist, score_hist):
         player_checker = self._CheckCards(self.cards, top_card)
@@ -74,9 +70,9 @@ class SmartPlayer(Player):
             self.my_manilhas = self._manilha[1]
 
         if len(self.my_manilhas) == 0:
-            self.manilha(False)
+            self._manilha[0] = False
         else: 
-            self.manilha(True)
+            self._manilha[0] = True
 
         # TODO: arrumar o (index out of range) da manilha - acontece quando temos mais de uma manilha que carrega o index antigo da carta 
         # (sugestao: ao inves de usar o index, salvar a propria manilha como carta e depois procurar o index)
