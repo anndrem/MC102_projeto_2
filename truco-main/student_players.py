@@ -146,19 +146,23 @@ class SmartPlayer(Player):
     '''O JOGO ESTA DEFINIDO AQUI'''
     def play(self, top_card, play_hist, score_hist):
         if len(self.cards) == 3:
-            self._start()
-        if len(self.my_manilhas) == 0:
-            self.manilha(False)
-        else: 
-            self.manilha(True)
+            self._start(top_card)
 
-        # TODO: arrumar o (index out of range) da manilha - acontece quando temos mais de uma manilha que carrega o index antigo da carta 
-        # (sugestao: ao inves de usar o index, salvar a propria manilha como carta e depois procurar o index)
-        if self._manilha[1]:
-            pedir_truco = True if score_hist[-1][-1] == 1 else False
-            idx_manilha = self.my_manilhas[-1]
-            self.my_manilhas.pop()
-            return DECISAO['truco'] if pedir_truco else DECISAO['normal'], self.cards[idx_manilha]
+        current_round = play_hist[-1]
+
+        my_hand = self._checker_hand(self.position, self.cards, top_card)
+
+
+        if my_hand.trumps():
+            call_truco = True if score_hist[-1][-1] == 1 else False
+            idx_trump = my_hand.use_trump()
+            return DECISAO['truco'] if call_truco else DECISAO['normal'], self.cards[idx_trump]
+
+        if len(current_round) > 0:
+            play_best = my_hand.play_check(current_round)
+            idx_card = self.cards.index(play_best[1])
+            return DECISAO['normal'], self.cards[idx_card]
+                
         
         if self._cards:
             return DECISAO['normal'], self.cards[0]
