@@ -108,11 +108,6 @@ class PlayersHand(CheckCards):
         return self._hand_cards.index(self._trumps.pop())
 
     def play_check(self, current_round):
-        if len(current_round) == 0:
-            # primeiro a jogar
-            pass
-
-        
         last_play = current_round[-1]
         last_position = last_play[0]    
         last_card = last_play[1]    
@@ -152,16 +147,15 @@ class SmartPlayer(Player):
 
         my_hand = self._checker_hand(self.position, self.cards, top_card)
 
+        if len(current_round) > 0:
+            play_best = my_hand.play_check(current_round)
+            idx_card = self.cards.index(play_best[1])
+            return DECISAO['normal'], self.cards[idx_card]
 
         if my_hand.trumps():
             call_truco = True if score_hist[-1][-1] == 1 else False
             idx_trump = my_hand.use_trump()
             return DECISAO['truco'] if call_truco else DECISAO['normal'], self.cards[idx_trump]
-
-        if len(current_round) > 0:
-            play_best = my_hand.play_check(current_round)
-            idx_card = self.cards.index(play_best[1])
-            return DECISAO['normal'], self.cards[idx_card]
                 
         
         if self._cards:
