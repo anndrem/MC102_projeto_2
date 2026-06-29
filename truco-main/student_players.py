@@ -73,6 +73,25 @@ class PlayersHand(CheckCards):
     def use_manilha(self):          
         return self._hand_cards.index(self._manilhas.pop())
 
+    def Good_Hand(self):
+        best_cards = 0
+        cont = 0
+        good_cards = False
+        
+        for carta in self._hand_cards:
+                if carta in self._manilhas:
+                   cont += 1
+                   best_cards += 1                
+                if carta not in self._manilhas:
+                    if self._ORDER_CARDS.index(carta[0]) >= 6:
+                        cont +=1
+                    if self._ORDER_CARDS.index(carta[0]) > 7:
+                        best_cards +=1
+        if cont ==3 or best_cards >=2:
+            good_cards = True               
+                    
+        return good_cards
+        
 
 class SmartPlayer(Player):
     def __init__(self, ra, name):
@@ -84,7 +103,8 @@ class SmartPlayer(Player):
     def _start(self, top_card):
             player_checker = self._CheckCards(self.cards, top_card)
             self.cards = player_checker.sortCards()
-       
+            player_hand = self._checker_hand(self.cards, top_card)
+            self._good_hand = player_hand.Good_Hand()
     '''O JOGO ESTA DEFINIDO AQUI'''
     def play(self, top_card, play_hist, score_hist):
         if len(self.cards) == 3:
@@ -105,11 +125,14 @@ class SmartPlayer(Player):
     def respond(self,top_card,play_hist, score_hist):
         current_score = score_hist[-1][-1]
         teams_score = score_hist[-1][-2]
+        my_hand = self._checker_hand(self.cards, top_card)
         
         if current_score <= 9 and teams_score[0] <= 10 and teams_score[1] <= 10:
-            self._respond = RESPOSTA['aumentar']
-
-        if self._manilha[0]:
+            if self._good_hand or my_hand.manilhas:
+                self._respond = RESPOSTA['aumentar']
+            else:
+                self._respond = RESPOSTA['correr']
+        if my_hand.manilhas():
             self._respond = RESPOSTA['aceitar']
 
         else:
