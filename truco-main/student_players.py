@@ -16,12 +16,12 @@ class CheckCards():
         self._hand_cards = hand_cards
         self._top_card = top_card
         self._ORDER_CARDS = ['4' ,'5' ,'6' ,'7' ,'Q' ,'J' ,'K' ,'A' ,'2' ,'3']
-        self._ORDER_RANK = ['Diamonds', 'Spades', 'Hearts', 'Clubs']
+        self._ORDER_RANKS = ['Diamonds', 'Spades', 'Hearts', 'Clubs']
         
 
     def _listIdx(self):
         order_c_idx = lambda x: self._ORDER_CARDS.index(x)
-        order_r_idx = lambda x: self._ORDER_RANK.index(x)
+        order_r_idx = lambda x: self._ORDER_RANKS.index(x)
 
         cards_idx = [
             (order_c_idx(card), order_r_idx(rank)) 
@@ -38,7 +38,7 @@ class CheckCards():
         for card, rank in cards_idx:
             if card == 1 + self._ORDER_CARDS.index(self._top_card[0]):
                 found = True
-                trump = (self._ORDER_CARDS[card], self._ORDER_RANK[rank])
+                trump = (self._ORDER_CARDS[card], self._ORDER_RANKS[rank])
                 trumps.append(trump)
         
         return (found, trumps)
@@ -51,7 +51,7 @@ class CheckCards():
         cards_idx.sort(key= lambda c: c[0], reverse=True)
     
         sorted_cards = [
-            (self._ORDER_CARDS[card] , self._ORDER_RANK[rank])
+            (self._ORDER_CARDS[card] , self._ORDER_RANKS[rank])
             for card, rank in cards_idx
         ]
     
@@ -77,15 +77,18 @@ class CheckCards():
     
     def is_higher_than(self, oponent_card):
         cards_idx = self._listIdx()
+        
         oponent_checker = CheckCards([oponent_card], self._top_card)
         oponent_trump = oponent_checker.thereIsTrump()
+        
+        my_trump = self.thereIsTrump()
 
         found = False
         hihgers_idx = []
         hihgers = []
 
         oponent_card_idx = self._ORDER_CARDS.index(oponent_card[0])
-        oponent_rank_idx = self._ORDER_RANK.index(oponent_card[1])
+        oponent_rank_idx = self._ORDER_RANKS.index(oponent_card[1])
         
         for card, rank in cards_idx:
             if oponent_trump[0] and card == oponent_card_idx and rank > oponent_rank_idx:
@@ -94,12 +97,17 @@ class CheckCards():
             elif card > oponent_card_idx:
                 found = True
                 hihgers_idx.append([card, rank])
+            elif my_trump[0]:
+                found = True
+                card_trump = self._ORDER_CARDS.index(my_trump[1][0][0])
+                rank_trump = self._ORDER_RANKS.index(my_trump[1][0][1])
+                hihgers_idx.append([card_trump, rank_trump])
         
         if len(hihgers_idx) > 0:
             hihgers_idx.sort(key= lambda x: x[0])
             
             hihgers = [
-                (self._ORDER_CARDS[card_idx], self._ORDER_RANK[rank_idx])
+                (self._ORDER_CARDS[card_idx], self._ORDER_RANKS[rank_idx])
                 for card_idx, rank_idx in hihgers_idx
             ]
 
@@ -135,6 +143,8 @@ class PlayersHand(CheckCards):
         # current_hand funciona por mao
         slice_round = [0, 4, 8]
         current_round = current_hand[slice_round[_round]:]
+
+        print(f'round : {_round + 1}')
         return current_round
     
     def play_check(self, _current_hand, id_round):
@@ -144,6 +154,7 @@ class PlayersHand(CheckCards):
 
         if len(current_round) < 1:
             # primeiro a jogar
+            print('primeiro a jogar')
             return True, self._hand_cards[0]
         
         
@@ -160,23 +171,29 @@ class PlayersHand(CheckCards):
         winning_position = winning_play[0]    
         winning_card = winning_play[1]    
         
+        print(f'{winning_position}: {winning_card}')
+        
         if winning_position == self._position: 
             stronger = False
             best_play_card = self._hand_cards[0]
-        
+            print(f'ganhei: {best_play_card}')
         elif winning_position % 2 == 1:
             stronger = False
             best_play_card = self._hand_cards[-1]
+            print(f'descate: {best_play_card}')
 
         else:
             there_is_higher = self.is_higher_than(winning_card)
+            print(f'posso? {there_is_higher}')
             if there_is_higher[0]:
                 stronger = True
                 best_play_card = there_is_higher[1][0]
+                print(f'eu mato: {best_play_card}')
             else:
                 stronger = False
                 best_play_card = self._hand_cards[-1]
-            
+                print(f'to mal: {best_play_card}')
+
 
         return stronger, best_play_card
 
@@ -212,6 +229,7 @@ class SmartPlayer(Player):
             self.cards = player_checker.sortCards()
             player_hand = self._checker_hand(self._position,self.cards,top_card)
             self._good_hand = player_hand.Good_Hand()
+            print(f'vira : {top_card}')
 
     def play(self, top_card, play_hist, score_hist):
         if not self._cards:
@@ -220,7 +238,7 @@ class SmartPlayer(Player):
         if len(self.cards) == 3:
             self._start(top_card)
 
-
+        print(f'{self.name} : {self.cards}')
         my_hand = self._checker_hand(self.position, self.cards, top_card)
 
         current_hand = play_hist[-1]
