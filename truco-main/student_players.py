@@ -106,9 +106,25 @@ class PlayersHand(CheckCards):
     
     def use_trump(self):
         return self._hand_cards.index(self._trumps.pop())
+    
+    def _round_plays(self, current_hand, id_round):
+        current_round = []
+        idx_round = [0,2,1]
+        _round = idx_round.index(id_round)
 
-    def play_check(self, current_round):
-        last_play = current_round[-1]
+        # current_hand funciona por mao
+        slice_round = [0, 4, 8]
+        current_round = current_hand[slice_round[_round]:]
+        return current_round
+    
+    def play_check(self, current_hand, id_round):
+        current_round = self._round_plays(current_hand, id_round)
+
+        if len(current_round) < 1:
+            # primeiro a jogar
+            return True, self._hand_cards[0]
+        
+        last_play =  current_hand[-1]
         last_position = last_play[0]    
         last_card = last_play[1]    
         last_decision = last_play[2]   
@@ -121,11 +137,30 @@ class PlayersHand(CheckCards):
                 return False, self._hand_cards[-1]
             
         elif last_position == self._position: 
-            return False, self._hand_cards[0]
+            return True, self._hand_cards[0]
         
         else:
-            return False, self._hand_cards[0]
+            return True, self._hand_cards[0]
 
+    def Good_Hand(self):
+        best_cards = 0
+        cont = 0
+        good_cards = False
+        
+        for carta in self._hand_cards:
+                if carta in self._trumps:
+                   cont += 1
+                   best_cards += 1                
+                if carta not in self._trumps:
+                    if self._ORDER_CARDS.index(carta[0]) >= 6:
+                        cont +=1
+                    if self._ORDER_CARDS.index(carta[0]) > 7:
+                        best_cards +=1
+        if cont ==3 or best_cards >=2:
+            good_cards = True               
+        
+        return good_cards
+        
 
 class SmartPlayer(Player):
     def __init__(self, ra, name):
@@ -137,40 +172,46 @@ class SmartPlayer(Player):
     def _start(self, top_card):
             player_checker = self._CheckCards(self.cards, top_card)
             self.cards = player_checker.sortCards()
-       
+            player_hand = self._checker_hand(self._position,self.cards,top_card)
+            self._good_hand = player_hand.Good_Hand()
+
     '''O JOGO ESTA DEFINIDO AQUI'''
     def play(self, top_card, play_hist, score_hist):
         if len(self.cards) == 3:
             self._start(top_card)
 
-        current_round = play_hist[-1]
+        if not self._cards:
+            return 1, None
 
         my_hand = self._checker_hand(self.position, self.cards, top_card)
 
-        if len(current_round) > 0:
-            play_best = my_hand.play_check(current_round)
-            idx_card = self.cards.index(play_best[1])
-            return DECISAO['normal'], self.cards[idx_card]
+        current_hand = play_hist[-1]
+        id_round = len(self.cards) % 3
+        best_play = my_hand.play_check(current_hand, id_round)
 
         if my_hand.trumps():
             call_truco = True if score_hist[-1][-1] == 1 else False
             idx_trump = my_hand.use_trump()
             return DECISAO['truco'] if call_truco else DECISAO['normal'], self.cards[idx_trump]
-                
-        
-        if self._cards:
-            return DECISAO['normal'], self.cards[0]
+        else:
+            idx_card = self.cards.index(best_play[1])
+            return DECISAO['normal'], self.cards[idx_card]
             
-        return 1, None
-
     def respond(self,top_card,play_hist, score_hist):
         current_score = score_hist[-1][-1]
         teams_score = score_hist[-1][-2]
+        my_hand = self._checker_hand(self._position, self.cards, top_card)
         
-        if current_score <= 9 and teams_score[0] <= 10 and teams_score[1] <= 10:
-            self._respond = RESPOSTA['aumentar']
-
-        return self._respond
+        if teams_score[0] < 11:
+            if teams_score[0] + current_score < 12:
+                if self._good_hand:
+                    return RESPOSTA['aumentar']
+                if my_hand.trumps():
+                    return RESPOSTA['aceitar']
+                return RESPOSTA['correr']
+            return RESPOSTA['aceitar']      
+        
+        return RESPOSTA['aceitar']
 
 
 def pair_name():
