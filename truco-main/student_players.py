@@ -180,6 +180,8 @@ class SmartPlayer(Player):
         if len(self.cards) == 3:
             self._start(top_card)
 
+        if not self._cards:
+            return 1, None
 
         my_hand = self._checker_hand(self.position, self.cards, top_card)
 
@@ -191,13 +193,10 @@ class SmartPlayer(Player):
             call_truco = True if score_hist[-1][-1] == 1 else False
             idx_trump = my_hand.use_trump()
             return DECISAO['truco'] if call_truco else DECISAO['normal'], self.cards[idx_trump]
-                
-        
-        if self._cards:
-            return DECISAO['normal'], self.cards[0]
+        else:
+            idx_card = self.cards.index(best_play[1])
+            return DECISAO['normal'], self.cards[idx_card]
             
-        return 1, None
-
     def respond(self,top_card,play_hist, score_hist):
         current_score = score_hist[-1][-1]
         teams_score = score_hist[-1][-2]
