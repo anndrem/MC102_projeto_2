@@ -12,6 +12,7 @@ DECISAO = {'encoberta': 0, 'normal': 1, 'truco': 2}
 RESPOSTA = {'correr': 0, 'aceitar': 1, 'aumentar': 2}
 
 class CheckCards():
+    
     def __init__(self, hand_cards, top_card = None):
         self._hand_cards = hand_cards
         self._top_card = top_card
