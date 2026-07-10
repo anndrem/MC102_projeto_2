@@ -41,7 +41,9 @@ class CheckCards():
         return cards_idx
 
     def thereIsTrump(self):
-        
+        '''
+        Identifica se existem manilhas na mão usando a carta virada.
+        '''
         found = False
         trumps = []
         cards_idx = self._listIdx()
@@ -56,9 +58,8 @@ class CheckCards():
     
     def sortCards(self):
         '''
-        Identifica se existem manilhas na mão usando a carta virada.
+        Ordena as cartas da mão da mais forte para a mais fraca.
         '''
-
         if len(self._hand_cards) < 2:
             return self._hand_cards
 
@@ -73,6 +74,9 @@ class CheckCards():
         return sorted_cards
     
     def sortPlays(self, plays):
+        '''
+        Ordena as jogadas da rodada conforme a força das cartas.
+        '''
         self._hand_cards = self.sortCards()
 
         last_plays = {
@@ -91,6 +95,9 @@ class CheckCards():
         return sorted_plays
     
     def is_higher_than(self, oponent_card):
+        '''
+        Verifica se alguma carta da mão vence a carta adversária.
+        '''
         cards_idx = self._listIdx()
         
         oponent_checker = CheckCards([oponent_card], self._top_card)
@@ -129,13 +136,24 @@ class CheckCards():
         return (found, hihgers)
     
 class PlayersHand(CheckCards):
+    '''
+    Gerencia a estratégia de uma mão individual do jogador.
+    Decide jogadas e identifica situações favoráveis.
+    '''
+
     def __init__(self, position, hand_cards, top_card):
+        '''
+        Inicializa a mão do jogador herdando as funções de análise de cartas.
+        '''
         super().__init__(hand_cards, top_card)
         self._position = position
         self._hand_cards = hand_cards
         self._trumps = []
 
     def trumps(self):
+        '''
+        Verifica se o jogador possui uma manilha disponível.
+        '''
         if len(self._hand_cards) < 3:
             return len(self._trumps) > 0 
            
@@ -148,9 +166,15 @@ class PlayersHand(CheckCards):
         return True
     
     def use_trump(self):
+        '''
+        Escolhe e remove uma manilha para ser utilizada na jogada.
+        '''
         return self._hand_cards.index(self._trumps.pop())
     
     def _round_plays(self, current_hand, id_round):
+        '''
+        Obtém as cartas jogadas na rodada atual.
+        '''
         current_round = []
         idx_round = [0,2,1]
         _round = idx_round.index(id_round)
@@ -162,6 +186,9 @@ class PlayersHand(CheckCards):
         return current_round
     
     def play_check(self, _current_hand, id_round):
+        '''
+        Escolhe uma carta para tentar vencer ou economizar a mão.
+        '''
         stronger = False
         best_play_card = []
         current_round = self._round_plays(_current_hand, id_round)
@@ -185,11 +212,10 @@ class PlayersHand(CheckCards):
         winning_card = winning_play[1]    
         
         
-        if winning_position == self._position: 
-            stronger = False
+        if winning_position == self._position:
             best_play_card = self._hand_cards[0]
+            
         elif winning_position % 2 == 1:
-            stronger = False
             best_play_card = self._hand_cards[-1]
 
         else:
@@ -205,6 +231,9 @@ class PlayersHand(CheckCards):
         return stronger, best_play_card
 
     def Good_Hand(self):
+        '''
+        Avalia se a mão possui cartas fortes para aceitar truco.
+        '''
         best_cards = 0
         cont = 0
         good_cards = False
@@ -225,40 +254,53 @@ class PlayersHand(CheckCards):
         
 
 class SmartPlayer(Player):
+    '''
+    Implementa o jogador inteligente usando análise de cartas e risco.
+    '''
     def __init__(self, ra, name):
         super().__init__(ra, name) 
         self._respond = RESPOSTA['aceitar']
         self._CheckCards = CheckCards
         self._checker_hand = PlayersHand
+        self._call_truco = False
     
-    def _start(self, top_card):
-            player_checker = self._CheckCards(self.cards, top_card)
-            self.cards = player_checker.sortCards()
-            player_hand = self._checker_hand(self._position,self.cards,top_card)
-            self._good_hand = player_hand.Good_Hand()
+    def _start(self, top_card, score_hist):              
+        '''
+        Prepara a mão inicial ordenando cartas e avaliando sua força.
+        '''
+        player_checker = self._CheckCards(self.cards, top_card)
+        self.cards = player_checker.sortCards()
+        player_hand = self._checker_hand(self._position,self.cards,top_card)
+        self._good_hand = player_hand.Good_Hand()
 
     def play(self, top_card, play_hist, score_hist):
+        '''
+        Decide qual carta jogar e quando pedir truco.
+        '''
         if not self._cards:
             return 1, None
 
         if len(self.cards) == 3:
-            self._start(top_card)
+            self._start(top_card, score_hist)
 
         my_hand = self._checker_hand(self.position, self.cards, top_card)
 
+        self._call_truco = True if score_hist[-1][-1] == 1 else False
         current_hand = play_hist[-1]
         id_round = len(self.cards) % 3
         best_play = my_hand.play_check(current_hand, id_round)
+        idx_card = self.cards.index(best_play[1])
 
         if my_hand.trumps():
-            call_truco = True if score_hist[-1][-1] == 1 else False
             idx_trump = my_hand.use_trump()
-            return DECISAO['truco'] if call_truco else DECISAO['normal'], self.cards[idx_trump]
+            return DECISAO['truco'] if self._call_truco else DECISAO['normal'], self.cards[idx_trump]    
         else:
-            idx_card = self.cards.index(best_play[1])
             return DECISAO['normal'], self.cards[idx_card]
-            
-    def respond(self,top_card,play_hist, score_hist):
+
+    def respond(self,top_card, play_hist, score_hist):
+        '''
+        Decide entre correr, aceitar ou aumentar o truco.
+        '''
         current_score = score_hist[-1][-1]
         teams_score = score_hist[-1][-2]
         my_hand = self._checker_hand(self._position, self.cards, top_card)
