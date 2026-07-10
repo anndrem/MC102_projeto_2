@@ -132,6 +132,10 @@ class PlayersHand(CheckCards):
             return False, self._hand_cards[0]
 
     def Good_Hand(self):
+        """Define uma mão boa a partir da verificação do nivel das cartas e se há ou não uma manilha. 
+           A partir do retorno do booleano(True ou False) um jogador pode decidir se deve ou não aceitar 
+           um pedido de truco, por exemplo"""
+        
         best_cards = 0
         cont = 0
         good_cards = False
@@ -141,7 +145,7 @@ class PlayersHand(CheckCards):
                    cont += 1
                    best_cards += 1                
                 if carta not in self._trumps:
-                    if self._ORDER_CARDS.index(carta[0]) >= 6:
+                    if self._ORDER_CARDS.index(carta[0]) > 6:
                         cont +=1
                     if self._ORDER_CARDS.index(carta[0]) > 7:
                         best_cards +=1
