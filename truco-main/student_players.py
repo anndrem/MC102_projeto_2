@@ -1,8 +1,8 @@
 ### TODO: PREENCHA SUAS INFORMAÇÕES AQUI ###
 # Nome #01 (quem entregou o código):    André de Almeida Maximiano 
 # RA #01 (quem entregou o código):      306387
-# Nome #02:                             [NOME COMPLETO #02]
-# RA #02:                               [RA #02]
+# Nome #02:                             Vinicius Brasil Turibio da Silva
+# RA #02:                               306565
 from basic_players import Player
 
 
@@ -132,9 +132,11 @@ class PlayersHand(CheckCards):
             return False, self._hand_cards[0]
 
     def Good_Hand(self):
-        """Define uma mão boa a partir da verificação do nivel das cartas e presença de manilhass. 
-           A partir do retorno do booleano(True ou False) um jogador pode decidir se deve ou não 
-           aceitar um pedido de truco, por exemplo"""
+        """Define uma mão boa a partir da verificação do nível das cartas e
+        presença de manilhas.
+        A partir do retorno do booleano (True ou False), um jogador pode
+        decidir se deve ou não aceitar um pedido de truco, por exemplo.
+        """
         
         best_cards = 0
         cont = 0
@@ -167,7 +169,7 @@ class SmartPlayer(Player):
             self.cards = player_checker.sortCards()
             player_hand = self._checker_hand(self._position,self.cards,top_card)
             self._good_hand = player_hand.Good_Hand()
-    '''O JOGO ESTA DEFINIDO AQUI'''
+    '''Função principal do jogador'''   
     def play(self, top_card, play_hist, score_hist):
         if len(self.cards) == 3:
             self._start(top_card)
@@ -194,6 +196,13 @@ class SmartPlayer(Player):
         return 1, None
 
     def respond(self,top_card,play_hist, score_hist):
+        """
+        Trata as respostas do truco com base em:
+        - valor da mão em jogo (pontos que a partida vale)
+        - pontuação atual do adversário
+        - retorno da função GoodHand
+        """
+        
         current_score = score_hist[-1][-1]
         teams_score = score_hist[-1][-2]
         my_hand = self._checker_hand(self._position, self.cards, top_card)
